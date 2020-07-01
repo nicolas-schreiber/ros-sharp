@@ -20,6 +20,16 @@ limitations under the License.
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>
+#include <windows.h>
+
+#ifndef S_ISDIR
+#define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
+#endif
+
+#ifndef S_ISREG
+#define S_ISREG(mode)  (((mode) & S_IFMT) == S_IFREG)
+#endif
+
 
 bool get_file(
 	file_server::GetBinaryFile::Request &req,
@@ -74,7 +84,8 @@ void create_directories(std::string packagePath, std::string filePath)
 	struct stat sb;
 	if (!(stat((packagePath + filePath).c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))) //Check if path is already a directory
 	{
-		mkdir((packagePath + filePath).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		CreateDirectory((packagePath + filePath).c_str(), NULL);
+//		mkdir((packagePath + filePath).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	}
 	
 }
@@ -85,7 +96,9 @@ std::string generate_ros_package(std::string packageName)
 	
 	
 	std::string directory = catkin_folder + "/" + packageName;
-	mkdir(directory.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	CreateDirectory(directory.c_str(), NULL);
+
+//	mkdir(directory.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	
 	//Create default package.xml file
 	std::string packageXmlContents = "<?xml version=\"1.0\"?>\n<package format=\"2\">\n  <name>" + packageName + "</name>\n  <version>0.0.0</version>\n  <description>The " + packageName + " package</description>\n\n  <maintainer email=\"ros-sharp.ct@siemens.com\">Ros#</maintainer>\n\n  <license>Apache 2.0</license>\n\n  <buildtool_depend>catkin</buildtool_depend>\n  <build_depend>roscpp</build_depend>\n  <build_depend>rospy</build_depend>\n  <build_depend>std_msgs</build_depend>\n  <build_export_depend>roscpp</build_export_depend>\n  <build_export_depend>rospy</build_export_depend>\n  <build_export_depend>std_msgs</build_export_depend>\n  <exec_depend>roscpp</exec_depend>\n  <exec_depend>rospy</exec_depend>\n  <exec_depend>std_msgs</exec_depend>\n\n  <export>\n  </export>\n</package>";
