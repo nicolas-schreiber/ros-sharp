@@ -14,6 +14,7 @@ limitations under the License.
 */
 
 // this class (System.Net.WebSockets) requires .NET 4.5+ to compile and Windows 8+ to work
+// edit: seems to have been fixed https://github.com/dotnet/runtime/issues/28000
 
 using System;
 using System.IO;
@@ -153,4 +154,3 @@ namespace RosSharp.RosBridgeClient.Protocols
         }
     }
 }
-
