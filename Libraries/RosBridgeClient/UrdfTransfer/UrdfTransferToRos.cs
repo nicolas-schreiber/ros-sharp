@@ -112,8 +112,7 @@ namespace RosSharp.RosBridgeClient.UrdfTransfer
                     }
                     catch (UriFormatException e)
                     {
-                        Console.WriteLine("Filename " + xElement.Attribute("filename").Value +
-                                          " is not formatted correctly.\n" + e);
+
                     }
             }
         }
@@ -148,7 +147,7 @@ namespace RosSharp.RosBridgeClient.UrdfTransfer
                 }
                 catch (IOException)
                 {
-                    Console.WriteLine("Transfer to ROS: Could not find file " + absolutePath + ".");
+
                 }
             }
         }

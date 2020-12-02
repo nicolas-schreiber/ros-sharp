@@ -13,17 +13,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using System;
 using System.Text;
+
+#if !WINDOWS_UWP
+
 using System.Text.Json;
 
 namespace RosSharp.RosBridgeClient
 {
     class MicrosoftSerializer : ISerializer
     {
+        private readonly JsonSerializerOptions options = new JsonSerializerOptions()
+        {
+            IgnoreReadOnlyProperties = true
+        };
+
         public byte[] Serialize<T>(T obj)
         {
-            string json = JsonSerializer.Serialize(obj, obj.GetType());
-            return Encoding.ASCII.GetBytes(json);            
+            string json = JsonSerializer.Serialize(obj, obj.GetType(), options);
+            return Encoding.ASCII.GetBytes(json);
         }
 
         public DeserializedObject Deserialize(byte[] buffer)
@@ -55,3 +64,31 @@ namespace RosSharp.RosBridgeClient
         }
     }
 }
+
+#endif
+#if WINDOWS_UWP
+
+namespace RosSharp.RosBridgeClient
+{
+    class MicrosoftSerializer : ISerializer
+    {
+        public byte[] Serialize<T>(T obj)
+        {
+            throw new Exception("This feature is not available on the current platform");
+        }
+
+        public DeserializedObject Deserialize(byte[] buffer)
+        {
+            throw new Exception("This feature is not available on the current platform");
+        }
+
+        public T Deserialize<T>(string json)
+        {
+            throw new Exception("This feature is not available on the current platform");
+        }
+
+    }
+}
+
+#endif 
+

@@ -1,4 +1,4 @@
-﻿/*
+/*
 © Siemens AG, 2017-2018
 Author: Dr. Martin Bischoff (martin.bischoff@siemens.com)
 
@@ -13,7 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using Newtonsoft.Json;
+
 namespace RosSharp.RosBridgeClient
 {
-    public abstract class Message { }
+    public abstract class Message {
+        public virtual string RosMessageName { get { return ""; } } //Overridable const
+        public bool ShouldSerializeRosMessageName() => false;
+    }
 }

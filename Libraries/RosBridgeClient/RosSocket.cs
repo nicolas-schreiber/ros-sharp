@@ -86,7 +86,7 @@ namespace RosSharp.RosBridgeClient
 
         #region Publishers
 
-        public string Advertise<T>(string topic) where T : Message
+        public string Advertise<T>(string topic) where T : Message, new()
         {
             string id = topic;
             if (Publishers.ContainsKey(id))
@@ -99,7 +99,13 @@ namespace RosSharp.RosBridgeClient
 
         public void Publish(string id, Message message)
         {
-            Send(Publishers[id].Publish(message));
+            if (!Publishers.ContainsKey(id))
+            {
+                Output.Log("Key of publisher not found! Message was not published");
+                return;
+            }
+            Communication comm = Publishers[id].Publish(message);
+            Send(comm);
         }
 
         public void Unadvertise(string id)
@@ -112,13 +118,13 @@ namespace RosSharp.RosBridgeClient
 
         #region Subscribers
 
-        public string Subscribe<T>(string topic, SubscriptionHandler<T> subscriptionHandler, int throttle_rate = 0, int queue_length = 1, int fragment_size = int.MaxValue, string compression = "none") where T : Message
+        public string Subscribe<T>(string topic, SubscriptionHandler<T> subscriptionHandler, int throttle_rate = 0, int queue_length = 1, int fragment_size = int.MaxValue, string compression = "none") where T : Message, new()
         {
             string id;
             lock (SubscriberLock)
             {
                 id = GetUnusedCounterID(Subscribers, topic);
-                Subscription subscription;
+                Subscription subscription = null;
                 Subscribers.Add(id, new Subscriber<T>(id, topic, subscriptionHandler, out subscription, throttle_rate, queue_length, fragment_size, compression));
                 Send(subscription);
             }
@@ -135,7 +141,7 @@ namespace RosSharp.RosBridgeClient
 
         #region ServiceProviders
 
-        public string AdvertiseService<Tin, Tout>(string service, ServiceCallHandler<Tin, Tout> serviceCallHandler) where Tin : Message where Tout : Message
+        public string AdvertiseService<Tin, Tout>(string service, ServiceCallHandler<Tin, Tout> serviceCallHandler) where Tin : Message, new() where Tout : Message
         {
             string id = service;
             if (ServiceProviders.ContainsKey(id))
@@ -170,7 +176,8 @@ namespace RosSharp.RosBridgeClient
 
         private void Send<T>(T communication) where T : Communication
         {
-            protocol.Send(Serializer.Serialize<T>(communication));
+            byte[] data = Serializer.Serialize<T>(communication);
+            protocol.Send(data);
             return;
         }
 
@@ -178,6 +185,7 @@ namespace RosSharp.RosBridgeClient
         {
             byte[] buffer = ((MessageEventArgs)e).RawData;
             DeserializedObject jsonElement = Serializer.Deserialize(buffer);
+
 
             switch (jsonElement.GetProperty("op"))            
             {

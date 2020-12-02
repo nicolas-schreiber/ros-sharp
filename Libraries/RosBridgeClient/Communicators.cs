@@ -23,9 +23,10 @@ namespace RosSharp.RosBridgeClient
 
     internal abstract class Communicator
     {
-        public static string GetRosName<T>() where T : Message
+        public static string GetRosName<T>() where T : Message, new()
         {
-            return (string)typeof(T).GetField("RosMessageName").GetRawConstantValue();
+            string name = new T().RosMessageName;
+            return name;
         }
     }
     internal abstract class Publisher : Communicator
@@ -41,7 +42,7 @@ namespace RosSharp.RosBridgeClient
         }
     }
 
-    internal class Publisher<T> : Publisher where T : Message
+    internal class Publisher<T> : Publisher where T : Message, new()
     {
         internal override string Id { get; }
         internal override string Topic { get; }
@@ -73,7 +74,7 @@ namespace RosSharp.RosBridgeClient
         }
     }
 
-    internal class Subscriber<T> : Subscriber where T : Message
+    internal class Subscriber<T> : Subscriber where T : Message, new()
     {
         internal override string Id { get; }
         internal override string Topic { get; }
@@ -107,7 +108,7 @@ namespace RosSharp.RosBridgeClient
         }
     }
 
-    internal class ServiceProvider<Tin, Tout> : ServiceProvider where Tin : Message where Tout : Message
+    internal class ServiceProvider<Tin, Tout> : ServiceProvider where Tin : Message, new() where Tout : Message
     {
         internal override string Service { get; }
         internal ServiceCallHandler<Tin, Tout> ServiceCallHandler;
